@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<style>
+table, th, td {
+  border:1px solid black;
+}
+</style>
+<script language="JavaScript">
+    window.addEventListener(
+          "message",
+          (event) => {
+            // convert message to formatted JSON text for display
+            const data = JSON.parse(event.data);
+            const str = JSON.stringify(data, null, 4);
+            const out = document.getElementById("out");
+            out.textContent = str;
+            // read state out of message
+            const processed_products = data.state["processed_products"];
+            const projected_missed_products = data.state["projected_missed_products"];
+            const energy = data.state["o1_energy"];
+          },
+          false
+    );
+
+    window.onload = function(){
+    var processed_products = data.state["processed_products"];
+
+    document.getElementById('output').innerHTML = processed_products;
+};
+
+    const items1 = [
+        {processed:processed_products,missed:projected_missed_products,energy_mes:energy}
+    ]
+    
+    function loadTableData(items) {
+    const table = document.getElementById("displaytab");
+    items.forEach( item => {
+      let row = table.insertRow();
+      let prods = row.insertCell(0);
+      prods.innerHTML = item.processed;
+      let missed = row.insertCell(1);
+      missed.innerHTML = item.missed;
+      let energy_info = row.insertCell(2)
+      energy_info.innerHTML = item.energy_mes
+    });
+  }
+
+  loadTableData(items1);
+
+</script>
+<body>
+
+    <h2>Simulation State</h2>
+    <p id="output"></p>
+    
+    <table id="displaytab" style="width:100%">
+      <tr>
+        <td>Processed Products</td>
+        <td>Projected Missed Products</td>
+        <td>Energy</td>
+      </tr>
+      <tr>
+        <td>$processed_products</td>
+        <td>$projected_missed_products</td>
+        <td>$energy</td>
+      </tr>
+    </table>
+</body>
+</html>
