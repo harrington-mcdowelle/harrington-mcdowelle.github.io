@@ -58,7 +58,7 @@
                         value: 0,
                         viewBox: "0 0 100 57",
                         label: function (value) {
-                            return value + " MW";
+                            return value.toFixed(1)+ " MW";
                         },
                         color: function (value) {
                             if (value < 80) {
