@@ -1,69 +1,231 @@
-<!DOCTYPE html>
-<html>
-<style>
-table, th, td {
-  border:1px solid black;
-}
-</style>
-<script language="JavaScript">
-    window.addEventListener(
-          "message",
-          (event) => {
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Fulfillment Center Visualizer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        @import url('./reset.css');
+        @import url('./styles.css');
+    </style>
+
+    <script type="text/javascript" src="./gauge.js"> </script>
+    <script language="JavaScript">
+        /*
+         * Copyright: Microsoft 2022.
+         *
+         * An example visualizer for use with CSTR simulators.
+         */
+        const svgns = "http://www.w3.org/2000/svg";
+        const params = new URLSearchParams(window.location.search);
+        const darkMode = params.get("_theme") === "dark";
+        const debug = params.get("debug") === "true";
+
+        // set on load()
+        let o1energygauge = undefined;
+        let o2energygauge = undefined;
+
+        const O1_Energy = 0;
+
+        // Cref: desired concentration
+        const O2_Energy = 0;
+
+        //Tref: desired temperature
+        const Time_remaining = 0;
+
+        // Tc : cooling jacket medium temperature
+        const Conveyor_choice = 0;
+
+        // utility setAttributes
+        function setAttributes(el, attributes) {
+            for (var attr in attributes) el.setAttribute(attr, attributes[attr]);
+        }
+
+        // setup the document
+        function setup() {
+            try {
+                //https://github.com/naikus/svg-gauge/blob/master/src/gauge.js
+                o1energygauge = Gauge(
+                    document.getElementById("o1_energy_gauge"),
+                    {
+                        min: -0.1,
+                        max: 12,
+                        dialStartAngle: 180,
+                        dialEndAngle: 0,
+                        easing: true,
+                        value: 0,
+                        viewBox: "0 0 100 57",
+                        label: function (value) {
+                            return value + " MW";
+                        },
+                        color: function (value) {
+                            if (value < 80) {
+                                return "#5ee432"; //Green
+                            } else if (value < 149) {
+                                return "#fffa50"; //Yellow
+                            } else if (value >= 150) {
+                                return "#ef4655"; //Red
+                            } else {
+                                return "#f7aa38"; //Orange
+                            }
+                        }
+                    }
+                );
+
+                o2energygauge = Gauge(
+                    document.getElementById("o2_energy_gauge"),
+                    {
+                        min: 10,
+                        max: 800,
+                        dialStartAngle: 180,
+                        dialEndAngle: 0,
+                        easing: true,
+                        value: 0,
+                        viewBox: "0 0 100 57",
+                        label: function (value) {
+                            return value.toFixed(1) + " MW";
+                        },
+                        color: function (value) {
+                            if (value < 80) {
+                                return "#5ee432"; //Green
+                            } else if (value < 149) {
+                                return "#fffa50"; //Yellow
+                            } else if (value >= 150) {
+                                return "#ef4655"; //Red
+                            } else {
+                                return "#f7aa38"; //Orange
+                            }
+                        }
+                    }
+                );
+
+                // adjust our colors based upon theme.
+                if (darkMode) {
+                    document.body.style.backgroundColor = "#333";
+                    document.body.style.color = "white";
+                }
+            } catch (e) {
+                // ignore
+            }
+
+            // loading text
+            if (debug) {
+                const out = document.getElementById("out");
+                out.textContent = "Waiting...";
+            }
+            // initial update
+            update({
+                state: {
+                    estimated_time_remaining: 3.93,
+                    o1_conveyor_count: 7,
+                    o1_energy: 115.266,
+                    o1_times: 90,
+                    o2_conveyor_count: 2,
+                    o2_energy: 0,
+                    o2_times: 0,
+                    order_1_delivery_window: 3,
+                    order_1_products: 697,
+                    processed_products: 12,
+                    projected_missed_products: 187,
+                    remaining_time: 2.93,
+                    simulation_time: 248,
+                    throughput_rate: 175,
+                    unprocessed_products: 7
+                },
+                action: {
+                    conveyor_choice: 1
+                },
+            });
+        }
+
+        // update the visualization from state and action data
+        function update(data) {
             // convert message to formatted JSON text for display
-            const data = JSON.parse(event.data);
-            const str = JSON.stringify(data, null, 4);
-            const out = document.getElementById("out");
-            out.textContent = str;
-            // read state out of message
-            const processed_products = data.state["processed_products"];
-            const projected_missed_products = data.state["projected_missed_products"];
-            const energy = data.state["o1_energy"];
-          },
-          false
-    );
+            const str = JSON.stringify(data, null, 2);
 
-    window.onload = function(){
-    var processed_products = data.state["processed_products"];
+            if (debug) {
+                const out = document.getElementById("out");
+                out.textContent = str;
+            }
 
-    document.getElementById('output').innerHTML = processed_products;
-};
+            try {
+                // update positions of graphical elements
+                // Cr : product specific residual concentration mixture of A and B
+                const O1_Energy = parseFloat(data.state["o1_energy"].toFixed(2));
 
-    const items1 = [
-        {processed:processed_products,missed:projected_missed_products,energy_mes:energy}
-    ]
-    
-    function loadTableData(items) {
-    const table = document.getElementById("displaytab");
-    items.forEach( item => {
-      let row = table.insertRow();
-      let prods = row.insertCell(0);
-      prods.innerHTML = item.processed;
-      let missed = row.insertCell(1);
-      missed.innerHTML = item.missed;
-      let energy_info = row.insertCell(2)
-      energy_info.innerHTML = item.energy_mes
-    });
-  }
+                // Cref: desired concentration
+                const O2_Energy = parseFloat(data.state["o2_energy"].toFixed(2));
 
-  loadTableData(items1);
+                // Tr : reactor temperature
+                const Time_remaining = parseFloat(data.state["estimated_time_remaining"].toFixed(1));
 
-</script>
+                //Tref: desired temperature
+                const Conveyor_choice = parseFloat(data.action["conveyor_choice"].toFixed(1));
+
+                //Update gauge values
+                o1energygauge.setValue(O1_Energy, 1);
+                o2energygauge.setValue(O2_Energy, 1);
+
+                //update labels
+                const trLabel = document.getElementById("time_remaining_label");
+                if (Time_remaining >= 400) {
+                    trLabel.style.color = "red";
+                    trLabel.innerHTML = "OUT OF TIME";
+                }
+                else {
+                    trLabel.style.color = "rgb(153, 153, 153)";
+                    trLabel.innerHTML = Time_remaining.toFixed(1) + " hours";
+                }
+
+
+                const ccLabel = document.getElementById("conveyor_choice_label");
+                ccLabel.style.color = "rgb(153, 153, 153)";
+                ccLabel.innerHTML = "Conveyor choice: " + Conveyor_choice.toFixed(1);
+
+            } catch (e) {
+                // ignore
+            }
+        }
+        //}
+        function init() {
+            // on load
+            window.addEventListener("load", () => {
+                setup();
+            });
+
+            // on message
+            window.addEventListener(
+                "message",
+                (event) => {
+                    const data = JSON.parse(event.data);
+                    update(data);
+                },
+                false
+            );
+        }
+    </script>
+</head>
+
 <body>
+    <pre id="out" style="font-size: x-small; display: box; position: absolute"></pre>
+    <div class="flex-container">
+        <div id="o1_energy_gauge" class="gauge-container two" style="font-size: x-small ">
+            <span id="o1_energy_label" style="font-size: x-large">O1_Energy</span>
+        </div>
+        <div id="o2_energy_gauge" class="gauge-container two" style="font-size: x-small ">
+            <span id="o2_energy_label" style="font-size: x-large">O2_Energy</span>
+        </div>
+    <div class="flex-container">
+        <div id="time_remaining_label" class="ref-label">Time_remaining</div>
+        <div id="conveyor_choice_label" class="ref-label blue" style="font-weight: bold; background-color: var(--blue)">
+            Conveyor_choice</div>
+    </div>
 
-    <h2>Simulation State</h2>
-    <p id="output"></p>
-    
-    <table id="displaytab" style="width:100%">
-      <tr>
-        <td>Processed Products</td>
-        <td>Projected Missed Products</td>
-        <td>Energy</td>
-      </tr>
-      <tr>
-        <td>$processed_products</td>
-        <td>$projected_missed_products</td>
-        <td>$energy</td>
-      </tr>
-    </table>
+    <script language="JavaScript">
+        init();
+    </script>
 </body>
+
 </html>
