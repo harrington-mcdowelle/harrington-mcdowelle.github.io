@@ -118,21 +118,21 @@
             // initial update
             update({
                 state: {
-                    estimated_time_remaining: 3.93,
-                    o1_conveyor_count: 7,
-                    o1_energy: 115.266,
-                    o1_times: 90,
-                    o2_conveyor_count: 2,
+                    estimated_time_remaining: 0,
+                    o1_conveyor_count: 0,
+                    o1_energy: 0,
+                    o1_times: 0,
+                    o2_conveyor_count: 0,
                     o2_energy: 0,
                     o2_times: 0,
-                    order_1_delivery_window: 3,
-                    order_1_products: 697,
-                    processed_products: 12,
-                    projected_missed_products: 187,
-                    remaining_time: 2.93,
-                    simulation_time: 248,
-                    throughput_rate: 175,
-                    unprocessed_products: 7
+                    order_1_delivery_window: 0,
+                    order_1_products: 0,
+                    processed_products: 0,
+                    projected_missed_products: 0,
+                    remaining_time: 0,
+                    simulation_time: 0,
+                    throughput_rate: 0,
+                    unprocessed_products: 0
                 },
                 action: {
                     conveyor_choice: 1
@@ -159,7 +159,7 @@
                 const O2_Energy = parseFloat(data.state["o2_energy"].toFixed(2));
 
                 // Tr : reactor temperature
-                const Time_remaining = parseFloat(data.state["estimated_time_remaining"].toFixed(1));
+                const Time_remaining = parseFloat(data.state["estimated_time_remaining"].toFixed(2));
 
                 //Tref: desired temperature
                 const Conveyor_choice = parseFloat(data.action["conveyor_choice"].toFixed(1));
